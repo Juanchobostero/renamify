@@ -1,0 +1,1520 @@
+---
+// renamr — renombrador masivo de imágenes
+// Astro + Vanilla JS + JSZip · todo client-side
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Renamify — renombrador masivo de imágenes</title>
+  <meta name="description" content="Subí hasta 400 imágenes, definí un nombre base y descargalas todas renombradas en un .zip. Sin servidores, todo en tu navegador." />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <!-- Fondo y ambiente visual -->
+  <div class="noise" aria-hidden="true"></div>
+  <div class="orb orb1" aria-hidden="true"></div>
+  <div class="orb orb2" aria-hidden="true"></div>
+
+  <div class="app">
+
+    <!-- Header -->
+    <header>
+      <div class="logo-row">
+        <div class="logo-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke="currentColor">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand">Renamify</div>
+          <div class="tagline">renombrador masivo de imágenes</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="theme-toggle" id="themeToggle" title="Cambiar tema" type="button">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <span class="badge-free">100% gratis · sin registro</span>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-left">
+        <div class="slogan-badge">
+          <span class="slogan-dot" aria-hidden="true"></span>
+          Renombrá tus imágenes en segundos
+        </div>
+        <h1>Renombrado<br />masivo, <em>sin vueltas.</em></h1>
+        <p>
+          Subí hasta 400 imágenes, definí un nombre base y descargalas todas
+          renombradas en un <code>.zip</code>. Sin servidores, todo en tu navegador.
+        </p>
+        <div class="hero-stats">
+          <div class="stat">
+            <span class="stat-n">400</span>
+            <span class="stat-l">imágenes por vez</span>
+          </div>
+          <div class="stat-divider" aria-hidden="true"></div>
+          <div class="stat">
+            <span class="stat-n">0</span>
+            <span class="stat-l">datos enviados</span>
+          </div>
+          <div class="stat-divider" aria-hidden="true"></div>
+          <div class="stat">
+            <span class="stat-n">gratis</span>
+            <span class="stat-l">para siempre</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mockup visual -->
+      <div class="hero-right" aria-hidden="true">
+        <div class="mockup-window">
+          <div class="mockup-bar">
+            <span class="mockup-dot md-red"></span>
+            <span class="mockup-dot md-yellow"></span>
+            <span class="mockup-dot md-green"></span>
+            <span class="mockup-title">Renamify</span>
+          </div>
+          <div class="mockup-body">
+            <div class="mockup-label">● IMÁGENES</div>
+            <div class="mockup-cards">
+              <div class="mockup-card">
+                <div class="mockup-thumb" style="background:#2a1e1e;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4a3030" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+                <div class="mockup-card-badge">001</div>
+                <div class="mockup-card-body">
+                  <div class="mockup-old">IMG_4521.jpg</div>
+                  <div class="mockup-new">producto_001.jpg</div>
+                </div>
+              </div>
+              <div class="mockup-card">
+                <div class="mockup-thumb" style="background:#1e2a1e;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#304a30" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+                <div class="mockup-card-badge">002</div>
+                <div class="mockup-card-body">
+                  <div class="mockup-old">DSC_0032.jpg</div>
+                  <div class="mockup-new">producto_002.jpg</div>
+                </div>
+              </div>
+              <div class="mockup-card">
+                <div class="mockup-thumb" style="background:#1e1e2a;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#30304a" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+                <div class="mockup-card-badge">003</div>
+                <div class="mockup-card-body">
+                  <div class="mockup-old">foto_camara.png</div>
+                  <div class="mockup-new">producto_003.png</div>
+                </div>
+              </div>
+            </div>
+            <div class="mockup-seed-row">
+              <div class="mockup-input-wrap">
+                <div class="mockup-input-label">Nombre semilla</div>
+                <div class="mockup-input">producto</div>
+              </div>
+              <div class="mockup-input-wrap mockup-input-sm">
+                <div class="mockup-input-label">Dígitos</div>
+                <div class="mockup-input">3</div>
+              </div>
+            </div>
+            <div class="mockup-preview-bar">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#c8f03c" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <span>producto_001.jpg</span>
+            </div>
+            <div class="mockup-btn">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0b0d0f" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Descargar .zip
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Steps -->
+    <div class="steps-bar" id="stepsBar">
+      <div class="step active" data-step="1">
+        <div class="step-n">1</div>
+        <span>Subir imágenes</span>
+      </div>
+      <span class="step-arrow">›</span>
+      <div class="step" data-step="2">
+        <div class="step-n">2</div>
+        <span>Configurar nombre</span>
+      </div>
+      <span class="step-arrow">›</span>
+      <div class="step" data-step="3">
+        <div class="step-n">3</div>
+        <span>Descargar .zip</span>
+      </div>
+    </div>
+
+    <!-- Card: Drop zone -->
+    <div class="card" id="cardDrop">
+      <div class="card-header">
+        <div class="card-label">Imágenes</div>
+        <span class="file-counter" id="fileCounter" style="display:none"></span>
+      </div>
+
+      <!-- Drop zone -->
+      <div
+        class="dropzone"
+        id="dropzone"
+        role="button"
+        tabindex="0"
+        aria-label="Zona para subir imágenes"
+      >
+        <div class="drop-icon-wrap" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <div class="drop-title">Arrastrá las imágenes acá</div>
+        <div class="drop-sub">o hacé clic para explorar archivos</div>
+        <div class="drop-pills">
+          <span class="pill">JPG</span>
+          <span class="pill">PNG</span>
+          <span class="pill">WEBP</span>
+          <span class="pill">GIF</span>
+          <span class="pill limit">máx. 400 imágenes</span>
+        </div>
+      </div>
+
+      <!-- Input file oculto -->
+      <input
+        type="file"
+        id="fileInput"
+        multiple
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        style="display:none"
+        aria-hidden="true"
+      />
+
+      <!-- Mensaje de error -->
+      <div class="error-msg" id="errorMsg" role="alert" style="display:none"></div>
+    </div>
+
+    <!-- Card: Nombre base (se muestra cuando hay archivos) -->
+    <div class="card" id="cardSeed" style="display:none">
+      <div class="card-header">
+        <div class="card-label">Nombre base</div>
+      </div>
+      <div class="seed-grid">
+        <div class="field">
+          <label for="seed">Nombre semilla</label>
+          <input
+            type="text"
+            id="seed"
+            value="producto"
+            placeholder="ej: producto, item, foto..."
+            maxlength="80"
+          />
+          <p class="field-hint" id="seedHint">Caracteres inválidos: / \ : * ? " &lt; &gt; |</p>
+          <div class="seed-history" id="seedHistory" style="display:none">
+            <span class="seed-history-label">Recientes:</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="startNum">Desde número</label>
+          <input type="number" id="startNum" value="1" min="0" max="9999" />
+        </div>
+        <div class="field">
+          <label for="digits">Dígitos</label>
+          <input type="number" id="digits" value="3" min="1" max="5" />
+        </div>
+      </div>
+      <div class="preview-result">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <span class="preview-label">Vista previa del nombre generado:</span>
+        <span class="preview-val" id="previewVal">producto_001.jpg</span>
+      </div>
+    </div>
+
+    <!-- Card: Vista previa de archivos (se muestra cuando hay archivos) -->
+    <div class="card" id="cardPreview" style="display:none">
+      <div class="card-header">
+        <div class="card-label">Vista previa de archivos</div>
+        <span class="muted-sm" id="previewMeta"></span>
+      </div>
+      <div class="grid-preview" id="previewGrid"></div>
+    </div>
+
+    <!-- Action bar -->
+    <div class="action-bar" id="actionBar" style="display:none">
+      <div class="file-count">
+        <span class="count-bubble" id="countBubble">0 archivos</span>
+        <span class="count-label">listos para descargar</span>
+      </div>
+      <div class="actions">
+        <button class="btn-clear" id="btnClear" type="button">Limpiar todo</button>
+        <div class="btn-download-wrap">
+          <button class="btn-download" id="btnDownload" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span id="btnLabel">Descargar .zip</span>
+          </button>
+          <button class="btn-download-opts" id="btnOpts" type="button" title="Opciones de exportación">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          <div class="download-menu" id="downloadMenu">
+            <button class="download-menu-item" id="btnWithCsv" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="8" y1="13" x2="16" y2="13"/>
+                <line x1="8" y1="17" x2="16" y2="17"/>
+              </svg>
+              Descargar .zip + mapeo.csv
+            </button>
+            <button class="download-menu-item" id="btnWithJson" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="8" y1="13" x2="16" y2="13"/>
+                <line x1="8" y1="17" x2="16" y2="17"/>
+              </svg>
+              Descargar .zip + mapeo.json
+            </button>
+          </div>
+        </div>
+      </div>
+
+    <!-- Nota de privacidad -->
+    <div class="privacy-note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      Tus imágenes <strong>nunca salen de tu navegador</strong>. No hay servidores, no hay carga de archivos. Todo es 100% local y privado.
+    </div>
+
+    <!-- Toast -->
+  <div class="toast" id="toast">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    <span id="toastMsg">¡Listo!</span>
+  </div>
+  </div><!-- /app -->
+</body>
+</html>
+
+<style is:global>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0b0d0f;
+    --surface:  #13161a;
+    --surface2: #1c2026;
+    --border:   rgba(255,255,255,0.07);
+    --border2:  rgba(255,255,255,0.13);
+    --accent:   #c8f03c;
+    --accent2:  #9bbc28;
+    --text:     #f0f2f0;
+    --muted:    #7a8080;
+    --muted2:   #4a5050;
+    --danger:   #ff6b6b;
+    --mono:     'DM Mono', monospace;
+    --sans:     'DM Sans', sans-serif;
+    --display: 'Space Grotesk', sans-serif;
+    --radius:   14px;
+    --radius-sm: 10px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Fondo ── */
+  .noise {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.55;
+  }
+  .orb {
+    position: fixed; pointer-events: none; z-index: 0;
+    border-radius: 50%; filter: blur(80px);
+  }
+  .orb1 { width: 500px; height: 500px; top: -120px; left: -100px; background: radial-gradient(circle, rgba(200,240,60,0.11) 0%, transparent 70%); }
+  .orb2 { width: 350px; height: 350px; bottom: 60px;  right: -80px;  background: radial-gradient(circle, rgba(200,240,60,0.07) 0%, transparent 70%); }
+
+  /* ── Layout ── */
+  .app {
+    position: relative; z-index: 1;
+    max-width: 840px;
+    margin: 0 auto;
+    padding: 0 1.5rem 5rem;
+  }
+
+  /* ── Header ── */
+  header {
+    padding: 2.5rem 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 0.5px solid var(--border);
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.5s ease both;
+  }
+  .logo-row { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 38px; height: 38px; border-radius: 11px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--bg);
+    flex-shrink: 0;
+  }
+  .logo-icon svg { width: 18px; height: 18px; }
+  .brand    { font-family: var(--display); font-size: 19px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+  .tagline  { font-size: 12px; color: var(--muted); margin-top: 2px; font-weight: 300; }
+  .badge-free {
+    font-size: 11px; font-family: var(--mono);
+    color: var(--accent); border: 0.5px solid rgba(200,240,60,0.3);
+    padding: 4px 12px; border-radius: 20px;
+    background: rgba(200,240,60,0.06);
+    white-space: nowrap;
+  }
+
+  /* ── Hero ── */
+.hero {
+  margin-bottom: 2.5rem;
+  animation: fadeUp 0.5s 0.08s ease both;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+.hero-left { display: flex; flex-direction: column; }
+.hero-right {
+  display: flex; justify-content: flex-end; align-items: center;
+}
+
+.mockup-window {
+  width: 100%; max-width: 340px;
+  background: #0f1215;
+  border: 0.5px solid rgba(255,255,255,0.12);
+  border-radius: 14px; overflow: hidden;
+  transform: rotate(2deg);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(200,240,60,0.08);
+  transition: transform 0.4s ease;
+}
+.mockup-window:hover { transform: rotate(0deg) scale(1.01); }
+
+.mockup-bar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 0.5px solid rgba(255,255,255,0.07);
+  background: #0b0d0f;
+}
+.mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+.md-red    { background: #ff5f57; }
+.md-yellow { background: #febc2e; }
+.md-green  { background: #28c840; }
+.mockup-title {
+  font-family: var(--mono); font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  margin-left: auto; margin-right: auto; padding-right: 26px;
+  letter-spacing: 0.05em;
+}
+
+.mockup-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.mockup-label {
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+.mockup-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+.mockup-card {
+  background: #1c2026; border: 0.5px solid rgba(255,255,255,0.07);
+  border-radius: 8px; overflow: hidden; position: relative;
+}
+.mockup-thumb {
+  width: 100%; height: 54px;
+  display: flex; align-items: center; justify-content: center;
+}
+.mockup-card-badge {
+  position: absolute; top: 4px; right: 4px;
+  background: rgba(11,13,15,0.8);
+  font-family: var(--mono); font-size: 8px; font-weight: 500;
+  color: #c8f03c; padding: 1px 5px; border-radius: 10px;
+  border: 0.5px solid rgba(255,255,255,0.1);
+}
+.mockup-card-body { padding: 5px 6px 6px; border-top: 0.5px solid rgba(255,255,255,0.06); }
+.mockup-old {
+  font-family: var(--mono); font-size: 7px; color: rgba(255,255,255,0.2);
+  text-decoration: line-through; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mockup-new {
+  font-family: var(--mono); font-size: 8px; font-weight: 500;
+  color: rgba(255,255,255,0.85);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;
+}
+
+.mockup-seed-row { display: flex; gap: 6px; }
+.mockup-input-wrap { flex: 1; }
+.mockup-input-wrap.mockup-input-sm { flex: 0 0 52px; }
+.mockup-input-label { font-family: var(--mono); font-size: 8px; color: rgba(255,255,255,0.3); margin-bottom: 4px; }
+.mockup-input {
+  background: #1c2026; border: 0.5px solid rgba(255,255,255,0.1);
+  border-radius: 6px; padding: 5px 8px;
+  font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,0.75);
+}
+
+.mockup-preview-bar {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(200,240,60,0.06); border: 0.5px solid rgba(200,240,60,0.18);
+  border-radius: 6px; padding: 6px 10px;
+  font-family: var(--mono); font-size: 10px; font-weight: 500; color: #c8f03c;
+}
+
+.mockup-btn {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  background: #c8f03c; color: #0b0d0f;
+  font-family: var(--display); font-size: 11px; font-weight: 700;
+  border-radius: 7px; padding: 8px 0; cursor: default;
+}
+
+.slogan-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 12px; font-weight: 500;
+  color: var(--accent);
+  background: rgba(200,240,60,0.08);
+  border: 0.5px solid rgba(200,240,60,0.25);
+  padding: 6px 14px; border-radius: 30px;
+  margin-bottom: 18px; letter-spacing: 0.01em;
+}
+.slogan-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.75); }
+}
+.hero h1 {
+  font-family: var(--display); font-size: clamp(38px, 5.5vw, 56px);
+  font-weight: 800; line-height: 1.05; letter-spacing: -0.035em; color: var(--text);
+}
+.hero h1 em { color: var(--accent); font-style: normal; }
+.hero p {
+  color: var(--muted); font-size: 15px; margin-top: 14px;
+  font-weight: 300; max-width: 440px; line-height: 1.65;
+}
+.hero p code {
+  font-family: var(--mono); font-size: 13px;
+  color: var(--accent); background: rgba(200,240,60,0.1);
+  padding: 1px 6px; border-radius: 5px;
+}
+.hero-stats {
+  display: flex; align-items: center;
+  margin-top: 28px; background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px; padding: 16px 24px;
+  width: fit-content; gap: 24px;
+}
+.stat { display: flex; flex-direction: column; gap: 2px; }
+.stat-n {
+  font-family: var(--display); font-size: 20px; font-weight: 800;
+  color: var(--accent); letter-spacing: -0.03em; line-height: 1;
+}
+.stat-l { font-size: 11px; color: var(--muted); font-weight: 300; white-space: nowrap; }
+.stat-divider { width: 0.5px; height: 32px; background: var(--border2); flex-shrink: 0; }
+
+@media (max-width: 720px) {
+  .hero { grid-template-columns: 1fr; gap: 2rem; }
+  .hero-right { justify-content: center; }
+  .mockup-window { max-width: 300px; transform: rotate(0deg); }
+}
+@media (max-width: 480px) {
+  .hero-stats { gap: 16px; padding: 14px 18px; }
+  .stat-n { font-size: 17px; }
+}
+
+  .slogan-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    color: var(--accent);
+    background: rgba(200,240,60,0.08);
+    border: 0.5px solid rgba(200,240,60,0.25);
+    padding: 6px 14px; border-radius: 30px;
+    margin-bottom: 18px;
+    letter-spacing: 0.01em;
+  }
+  .slogan-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.75); }
+  }
+
+  .hero h1 {
+    font-family: var(--display); font-size: clamp(38px, 5.5vw, 56px);
+    font-weight: 800; line-height: 1.05; letter-spacing: -0.035em;
+    color: var(--text);
+  }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero p {
+    color: var(--muted); font-size: 15px; margin-top: 14px;
+    font-weight: 300; max-width: 440px; line-height: 1.65;
+  }
+  .hero p code {
+    font-family: var(--mono); font-size: 13px;
+    color: var(--accent); background: rgba(200,240,60,0.1);
+    padding: 1px 6px; border-radius: 5px;
+  }
+
+  .hero-stats {
+    display: flex; align-items: center;
+    margin-top: 28px;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 24px;
+    width: fit-content;
+    gap: 24px;
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-n {
+    font-family: var(--display); font-size: 20px; font-weight: 800;
+    color: var(--accent); letter-spacing: -0.03em; line-height: 1;
+  }
+  .stat-l { font-size: 11px; color: var(--muted); font-weight: 300; white-space: nowrap; }
+  .stat-divider {
+    width: 0.5px; height: 32px; background: var(--border2); flex-shrink: 0;
+  }
+  @media (max-width: 480px) {
+    .hero-stats { gap: 16px; padding: 14px 18px; }
+    .stat-n { font-size: 17px; }
+  }
+
+  /* ── Steps ── */
+  .steps-bar {
+    display: flex; align-items: center; gap: 4px;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.5s 0.13s ease both;
+  }
+  .step {
+    display: flex; align-items: center; gap: 7px;
+    padding: 7px 13px; border-radius: 30px;
+    font-size: 12px; font-weight: 500; transition: all 0.25s;
+    color: var(--muted2);
+  }
+  .step.active   { background: rgba(200,240,60,0.12); color: var(--accent); }
+  .step.done     { color: var(--muted); }
+  .step-n {
+    width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; flex-shrink: 0;
+    border: 0.5px solid var(--muted2); color: var(--muted2);
+    transition: all 0.25s;
+  }
+  .step.active .step-n { background: var(--accent); color: var(--bg); border-color: transparent; }
+  .step.done .step-n   { background: var(--muted2); color: var(--bg); border-color: transparent; }
+  .step-arrow { color: var(--muted2); font-size: 14px; padding: 0 2px; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+    animation: fadeUp 0.5s 0.18s ease both;
+  }
+  .card:hover { border-color: var(--border2); }
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+  .card-label {
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-label::before {
+    content: ''; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--accent); display: block;
+  }
+  .file-counter {
+    font-family: var(--mono); font-size: 12px; color: var(--muted);
+  }
+  .muted-sm { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+
+  /* ── Dropzone ── */
+  .dropzone {
+    border: 1.5px dashed rgba(200,240,60,0.25);
+    border-radius: var(--radius-sm);
+    padding: 3rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: radial-gradient(ellipse at 50% 80%, rgba(200,240,60,0.04) 0%, transparent 70%);
+  }
+  .dropzone:hover,
+  .dropzone:focus-visible {
+    border-color: rgba(200,240,60,0.5);
+    background: radial-gradient(ellipse at 50% 80%, rgba(200,240,60,0.08) 0%, transparent 70%);
+    outline: none;
+  }
+  .dropzone.drag-over {
+    border-color: var(--accent);
+    background: radial-gradient(ellipse at 50% 80%, rgba(200,240,60,0.13) 0%, transparent 70%);
+  }
+  .drop-icon-wrap {
+    width: 54px; height: 54px; border-radius: 15px;
+    background: rgba(200,240,60,0.1); border: 0.5px solid rgba(200,240,60,0.22);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    color: var(--accent);
+  }
+  .drop-icon-wrap svg { width: 22px; height: 22px; }
+  .drop-title { font-family: var(--display); font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .drop-sub   { font-size: 13px; color: var(--muted); }
+  .drop-pills {
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px; margin-top: 16px; flex-wrap: wrap;
+  }
+  .pill {
+    font-size: 11px; font-family: var(--mono); padding: 3px 10px;
+    border-radius: 20px; border: 0.5px solid var(--border2); color: var(--muted);
+  }
+  .pill.limit { border-color: rgba(200,240,60,0.25); color: var(--accent); }
+
+  /* ── Seed form ── */
+  .seed-grid {
+    display: grid;
+    grid-template-columns: 1fr 130px 120px;
+    gap: 12px;
+  }
+  @media (max-width: 560px) {
+    .seed-grid { grid-template-columns: 1fr 1fr; }
+    .seed-grid .field:first-child { grid-column: 1 / -1; }
+  }
+  .field label {
+    display: block; font-size: 12px; color: var(--muted);
+    margin-bottom: 7px; font-family: var(--mono); letter-spacing: 0.03em;
+  }
+  .field input {
+    width: 100%; padding: 0 14px; height: 42px;
+    border: 0.5px solid var(--border2); border-radius: var(--radius-sm);
+    background: var(--surface2); color: var(--text);
+    font-size: 15px; font-family: var(--mono); outline: none;
+    transition: all 0.2s; -webkit-appearance: none;
+  }
+  .field input:focus {
+    border-color: rgba(200,240,60,0.5);
+    box-shadow: 0 0 0 3px rgba(200,240,60,0.08);
+  }
+  input[type=number] { -moz-appearance: textfield; }
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .preview-result {
+    margin-top: 14px;
+    background: rgba(200,240,60,0.06);
+    border: 0.5px solid rgba(200,240,60,0.2);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .preview-result svg { width: 14px; height: 14px; color: var(--accent); flex-shrink: 0; }
+  .preview-label { font-size: 12px; color: var(--muted); }
+  .preview-val   { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--accent); }
+
+  /* ── Grid de preview ── */
+  .grid-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+    gap: 10px;
+  }
+  .img-card {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    position: relative;
+    cursor: default;
+    transition: all 0.2s;
+    animation: fadeUp 0.35s ease both;
+  }
+  .img-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .img-thumb {
+    width: 100%; height: 106px;
+    object-fit: cover; display: block;
+  }
+  .img-thumb-placeholder {
+    width: 100%; height: 106px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted2);
+  }
+  .img-thumb-placeholder svg { width: 28px; height: 28px; }
+  .img-badge {
+    position: absolute; top: 7px; right: 7px;
+    background: rgba(11,13,15,0.78);
+    border: 0.5px solid var(--border2);
+    font-family: var(--mono); font-size: 10px; font-weight: 500;
+    color: var(--accent); padding: 2px 8px; border-radius: 20px;
+  }
+  .img-body {
+    padding: 9px 11px 11px;
+    border-top: 0.5px solid var(--border);
+  }
+  .img-old {
+    font-size: 11px; color: var(--muted2);
+    text-decoration: line-through;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-family: var(--mono);
+  }
+  .img-new {
+    font-size: 12px; font-weight: 500; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-family: var(--mono); margin-top: 3px;
+  }
+
+  /* ── Error ── */
+  .error-msg {
+    margin-top: 12px;
+    background: rgba(255,107,107,0.08);
+    border: 0.5px solid rgba(255,107,107,0.3);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px; color: var(--danger);
+    font-family: var(--mono);
+  }
+
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+    margin-top: 1.5rem; padding-top: 1.5rem;
+    border-top: 0.5px solid var(--border);
+    animation: fadeUp 0.5s 0.22s ease both;
+  }
+  .file-count { display: flex; align-items: center; gap: 9px; }
+  .count-bubble {
+    font-family: var(--mono); font-size: 13px; font-weight: 500;
+    color: var(--accent); background: rgba(200,240,60,0.1);
+    border: 0.5px solid rgba(200,240,60,0.22);
+    padding: 3px 12px; border-radius: 20px;
+  }
+  .count-label { font-size: 13px; color: var(--muted); }
+  .actions { display: flex; gap: 10px; align-items: center; }
+
+  .btn-clear {
+    padding: 0 18px; height: 40px; border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border2); background: transparent;
+    color: var(--muted); font-size: 13px; cursor: pointer;
+    font-family: var(--sans); transition: all 0.2s;
+  }
+  .btn-clear:hover { background: var(--surface2); color: var(--text); }
+
+  .btn-download {
+    display: flex; align-items: center; gap: 9px;
+    padding: 0 22px; height: 40px; border-radius: var(--radius-sm);
+    border: none; background: var(--accent);
+    color: var(--bg); font-size: 14px; font-weight: 700;
+    font-family: var(--display); cursor: pointer;
+    transition: all 0.15s; letter-spacing: -0.01em;
+    position: relative; overflow: hidden;
+  }
+  .btn-download:hover   { background: #d9ff4a; transform: scale(1.02); }
+  .btn-download:active  { transform: scale(0.97); }
+  .btn-download:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-download svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  /* ── Privacy note ── */
+  .privacy-note {
+    display: flex; align-items: flex-start; gap: 9px;
+    margin-top: 1.25rem; padding: 12px 15px;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 12px; color: var(--muted); line-height: 1.6;
+    animation: fadeUp 0.5s 0.27s ease both;
+  }
+  .privacy-note svg { width: 14px; height: 14px; color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+  .privacy-note strong { color: var(--text); font-weight: 500; }
+
+  /* ── Animaciones ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    header { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .action-bar { flex-direction: column; align-items: flex-start; }
+    .actions { width: 100%; }
+    .btn-download { flex: 1; justify-content: center; }
+  }
+
+  /* ── Toast ── */
+.toast {
+  position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--accent); color: var(--bg);
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: 30px;
+  font-family: var(--display); font-size: 13px; font-weight: 700;
+  opacity: 0; pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 100; white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(200,240,60,0.25);
+}
+.toast svg { width: 15px; height: 15px; flex-shrink: 0; }
+.toast.show {
+  opacity: 1; pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Botón excluir card ── */
+.img-remove {
+  position: absolute; top: 6px; left: 6px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(11,13,15,0.8); border: 0.5px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+  color: var(--muted); font-size: 11px; line-height: 1;
+  z-index: 2;
+}
+.img-card:hover .img-remove { opacity: 1; }
+.img-remove:hover { background: var(--danger); color: #fff; border-color: transparent; }
+
+/* ── Validación semilla ── */
+.field input.invalid {
+  border-color: rgba(255,107,107,0.6);
+  box-shadow: 0 0 0 3px rgba(255,107,107,0.08);
+}
+.field-hint {
+  font-size: 11px; font-family: var(--mono);
+  color: var(--danger); margin-top: 6px;
+  display: none;
+}
+.field-hint.show { display: block; }
+
+/* ── Historial de nombres ── */
+.seed-history {
+  display: flex; align-items: center; gap: 6px;
+  flex-wrap: wrap; margin-top: 8px;
+}
+.seed-history-label {
+  font-size: 11px; font-family: var(--mono);
+  color: var(--muted2); white-space: nowrap;
+}
+.seed-chip {
+  font-size: 11px; font-family: var(--mono);
+  color: var(--muted); border: 0.5px solid var(--border2);
+  background: var(--surface2); padding: 3px 10px;
+  border-radius: 20px; cursor: pointer;
+  transition: all 0.15s;
+}
+.seed-chip:hover { color: var(--accent); border-color: rgba(200,240,60,0.35); background: rgba(200,240,60,0.06); }
+
+/* ── Drag & drop reorden ── */
+.img-card { cursor: grab; }
+.img-card.dragging { opacity: 0.4; cursor: grabbing; }
+.img-card.drag-over-card { border-color: rgba(200,240,60,0.6); background: rgba(200,240,60,0.04); }
+
+/* ── Dropdown descarga ── */
+.btn-download-wrap { position: relative; display: flex; }
+.btn-download { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.btn-download-opts {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 40px;
+  background: var(--accent2); color: var(--bg);
+  border: none; border-left: 1px solid rgba(0,0,0,0.15);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+}
+.btn-download-opts:hover { background: #b8dc30; }
+.btn-download-opts svg { width: 14px; height: 14px; }
+
+.download-menu {
+  position: absolute; bottom: calc(100% + 8px); right: 0;
+  background: var(--surface); border: 0.5px solid var(--border2);
+  border-radius: var(--radius-sm); overflow: hidden;
+  min-width: 240px;
+  opacity: 0; pointer-events: none;
+  transform: translateY(6px);
+  transition: all 0.2s ease;
+  z-index: 50;
+}
+.download-menu.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.download-menu-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 11px 16px;
+  background: transparent; border: none;
+  color: var(--muted); font-size: 13px; font-family: var(--sans);
+  cursor: pointer; text-align: left; transition: all 0.15s;
+}
+.download-menu-item:hover { background: var(--surface2); color: var(--text); }
+.download-menu-item svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--accent); }
+.download-menu-item + .download-menu-item { border-top: 0.5px solid var(--border); }
+
+/* ── Modo claro ── */
+body.light {
+  --bg:       #f5f5f2;
+  --surface:  #ffffff;
+  --surface2: #eeecea;
+  --border:   rgba(0,0,0,0.07);
+  --border2:  rgba(0,0,0,0.13);
+  --text:     #0f1110;
+  --muted:    #6a7070;
+  --muted2:   #a0a8a8;
+  --danger:   #cc3333;
+}
+body.light .noise { opacity: 0.2; }
+body.light .orb1  { background: radial-gradient(circle, rgba(150,200,20,0.15) 0%, transparent 70%); }
+body.light .orb2  { background: radial-gradient(circle, rgba(150,200,20,0.10) 0%, transparent 70%); }
+body.light .mockup-window { background: #e8e6e0; border-color: rgba(0,0,0,0.1); }
+body.light .mockup-bar    { background: #dedad4; border-color: rgba(0,0,0,0.08); }
+body.light .mockup-card   { background: #dedad4; }
+body.light .mockup-input  { background: #dedad4; border-color: rgba(0,0,0,0.1); color: #333; }
+body.light .mockup-preview-bar { background: rgba(100,160,10,0.08); }
+body.light .logo-icon { background: var(--accent2); }
+
+/* ── Toggle ── */
+.theme-toggle {
+  width: 36px; height: 36px; border-radius: 10px;
+  border: 0.5px solid var(--border2); background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s; color: var(--muted);
+  flex-shrink: 0;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--border2); }
+.theme-toggle svg { width: 16px; height: 16px; }
+.icon-moon { display: none; }
+body.light .icon-sun  { display: none; }
+body.light .icon-moon { display: block; }
+</style>
+
+<script>
+  import JSZip from 'jszip';
+
+  // ── Estado ──────────────────────────────────────────────
+  let files = [];          // File[] — archivos seleccionados
+  const MAX = 400;
+
+  // ── Referencias DOM ─────────────────────────────────────
+  const dropzone    = document.getElementById('dropzone');
+  const fileInput   = document.getElementById('fileInput');
+  const previewGrid = document.getElementById('previewGrid');
+  const previewMeta = document.getElementById('previewMeta');
+  const previewVal  = document.getElementById('previewVal');
+  const countBubble = document.getElementById('countBubble');
+  const fileCounter = document.getElementById('fileCounter');
+  const errorMsg    = document.getElementById('errorMsg');
+  const cardSeed    = document.getElementById('cardSeed');
+  const cardPreview = document.getElementById('cardPreview');
+  const actionBar   = document.getElementById('actionBar');
+  const btnDownload = document.getElementById('btnDownload');
+  const btnLabel    = document.getElementById('btnLabel');
+  const btnClear    = document.getElementById('btnClear');
+  const seedInput   = document.getElementById('seed');
+  const startInput  = document.getElementById('startNum');
+  const digitsInput = document.getElementById('digits');
+  const stepsBar    = document.getElementById('stepsBar');
+
+  // ── Helpers ─────────────────────────────────────────────
+  function pad(n, d) {
+    const digits = Math.min(Math.max(parseInt(d) || 3, 1), 5);
+    return String(Math.max(0, parseInt(n) || 0)).padStart(digits, '0');
+  }
+
+  function getExt(filename) {
+    const parts = filename.split('.');
+    return parts.length > 1 ? parts.pop().toLowerCase() : '';
+  }
+
+  function buildNewName(index) {
+    const seed  = seedInput.value.trim() || 'imagen';
+    const start = parseInt(startInput.value) || 1;
+    const d     = digitsInput.value;
+    const num   = pad(start + index, d);
+    const ext   = getExt(files[index].name);
+    return `${seed}_${num}${ext ? '.' + ext : ''}`;
+  }
+
+  function updatePreviewLabel() {
+    const seed  = seedInput.value.trim() || 'imagen';
+    const start = parseInt(startInput.value) || 1;
+    const d     = digitsInput.value;
+    const num   = pad(start, d);
+    const ext   = files.length > 0 ? getExt(files[0].name) || 'jpg' : 'jpg';
+    previewVal.textContent = `${seed}_${num}.${ext}`;
+  }
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.style.display = 'block';
+    setTimeout(() => { errorMsg.style.display = 'none'; }, 4000);
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    const toastMsg = document.getElementById('toastMsg');
+    toastMsg.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  function loadHistory() {
+    const history = JSON.parse(localStorage.getItem('renamr_history') || '[]');
+    const container = document.getElementById('seedHistory');
+    container.innerHTML = '<span class="seed-history-label">Recientes:</span>';
+
+    if (history.length === 0) {
+      container.style.display = 'none';
+      return;
+    }
+
+    container.style.display = 'flex';
+    history.forEach(name => {
+      const chip = document.createElement('button');
+      chip.className = 'seed-chip';
+      chip.textContent = name;
+      chip.type = 'button';
+      chip.addEventListener('click', () => {
+        seedInput.value = name;
+        updateGridNames();
+      });
+      container.appendChild(chip);
+    });
+  }
+
+  function saveToHistory(name) {
+    if (!name.trim()) return;
+    let history = JSON.parse(localStorage.getItem('renamr_history') || '[]');
+    history = [name, ...history.filter(n => n !== name)].slice(0, 5);
+    localStorage.setItem('renamr_history', JSON.stringify(history));
+    loadHistory();
+  }
+
+  function buildCsv() {
+    const rows = ['nombre_original,nombre_nuevo'];
+    files.forEach((f, i) => rows.push(`${f.name},${buildNewName(i)}`));
+    return rows.join('\n');
+  }
+
+  function buildJsonMap() {
+    return JSON.stringify(
+      files.map((f, i) => ({ original: f.name, nuevo: buildNewName(i) })),
+      null, 2
+    );
+  }
+
+  async function downloadZipWith(extra) {
+    if (files.length === 0) return;
+    btnDownload.disabled = true;
+    btnLabel.textContent = 'Generando .zip...';
+    document.getElementById('downloadMenu').classList.remove('open');
+
+    try {
+      const zip = new JSZip();
+
+      for (let i = 0; i < files.length; i++) {
+        zip.file(buildNewName(i), files[i]);
+        const pct = Math.round(((i + 1) / files.length) * 50);
+        btnLabel.textContent = `Procesando ${i + 1}/${files.length} — ${pct}%`;
+        if (i % 10 === 0) await new Promise(r => setTimeout(r, 0));
+      }
+
+      if (extra === 'csv')  zip.file('mapeo.csv',  buildCsv());
+      if (extra === 'json') zip.file('mapeo.json', buildJsonMap());
+
+      const blob = await zip.generateAsync(
+        { type: 'blob', compression: 'STORE' },
+        (meta) => { btnLabel.textContent = `Empaquetando — ${50 + Math.round(meta.percent / 2)}%`; }
+      );
+
+      const seedName = (seedInput.value.trim() || 'imagenes').replace(/\s+/g, '_');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${seedName}_renombradas.zip`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+
+      saveToHistory(seedInput.value.trim() || 'imagen');
+      updateSteps(3);
+      showToast(`✓ ${files.length} ${files.length === 1 ? 'imagen descargada' : 'imágenes descargadas'}`);
+      const delay = Math.min(Math.max(files.length * 50, 2000), 8000);
+      setTimeout(clearAll, delay);
+
+    } catch (err) {
+      console.error(err);
+      showError('Ocurrió un error al generar el ZIP. Intentá de nuevo.');
+    } finally {
+      btnDownload.disabled = false;
+      btnLabel.textContent = 'Descargar .zip';
+    }
+  }
+
+  // ── Steps ───────────────────────────────────────────────
+  function updateSteps(active) {
+    // active: 1, 2 o 3
+    stepsBar.querySelectorAll('.step').forEach(el => {
+      const n = parseInt(el.dataset.step);
+      el.classList.remove('active', 'done');
+      if (n < active)  el.classList.add('done');
+      if (n === active) el.classList.add('active');
+    });
+  }
+
+  // ── UI: mostrar/ocultar secciones ───────────────────────
+  function showFilesUI() {
+    cardSeed.style.display    = 'block';
+    cardPreview.style.display = 'block';
+    actionBar.style.display   = 'flex';
+    fileCounter.style.display = 'block';
+  }
+
+  function hideFilesUI() {
+    cardSeed.style.display    = 'none';
+    cardPreview.style.display = 'none';
+    actionBar.style.display   = 'none';
+    fileCounter.style.display = 'none';
+  }
+
+  // ── Renderizar grid de preview ───────────────────────────
+  function renderGrid() {
+    previewGrid.innerHTML = '';
+
+    const MAX_VISIBLE = 20; // mostramos hasta 20 thumbnails
+    const visible = files.slice(0, MAX_VISIBLE);
+
+    visible.forEach((file, i) => {
+      const card = document.createElement('div');
+      card.className = 'img-card';
+      card.style.animationDelay = `${i * 0.04}s`;
+
+      const newName = buildNewName(i);
+      const num     = pad((parseInt(startInput.value) || 1) + i, digitsInput.value);
+
+      // Thumbnail con FileReader
+      const url = URL.createObjectURL(file);
+      const img = document.createElement('img');
+      img.className = 'img-thumb';
+      img.alt = file.name;
+      img.src = url;
+      img.onload = () => URL.revokeObjectURL(url);
+      img.onerror = () => {
+        // Fallback placeholder
+        img.replaceWith(makePlaceholder());
+      };
+
+      const badge = document.createElement('div');
+      badge.className = 'img-badge';
+      badge.textContent = num;
+
+      const body = document.createElement('div');
+      body.className = 'img-body';
+
+      const oldDiv = document.createElement('div');
+      oldDiv.className = 'img-old';
+      oldDiv.title = file.name;
+      oldDiv.textContent = file.name;
+
+      const newDiv = document.createElement('div');
+      newDiv.className = 'img-new';
+      newDiv.title = newName;
+      newDiv.textContent = newName;
+
+      body.appendChild(oldDiv);
+      body.appendChild(newDiv);
+      card.appendChild(img);
+      card.appendChild(badge);
+      card.appendChild(body);
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'img-remove';
+      removeBtn.title = 'Excluir imagen';
+      removeBtn.textContent = '✕';
+      removeBtn.addEventListener('click', () => removeFile(i));
+      card.appendChild(removeBtn);
+
+      card.draggable = true;
+      card.dataset.index = i;
+
+      card.addEventListener('dragstart', e => {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', i);
+        setTimeout(() => card.classList.add('dragging'), 0);
+      });
+
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        document.querySelectorAll('.img-card').forEach(c => c.classList.remove('drag-over-card'));
+      });
+
+      card.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        document.querySelectorAll('.img-card').forEach(c => c.classList.remove('drag-over-card'));
+        card.classList.add('drag-over-card');
+      });
+
+      card.addEventListener('dragleave', e => {
+        if (!card.contains(e.relatedTarget)) card.classList.remove('drag-over-card');
+      });
+
+      card.addEventListener('drop', e => {
+        e.preventDefault();
+        card.classList.remove('drag-over-card');
+        const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+        const toIndex = parseInt(card.dataset.index);
+        if (fromIndex === toIndex) return;
+
+        // Intercambiar en el array
+        const moved = files.splice(fromIndex, 1)[0];
+        files.splice(toIndex, 0, moved);
+
+        renderGrid();
+        updatePreviewLabel();
+        updateMeta();
+      });
+
+      previewGrid.appendChild(card);
+    });
+
+    // Pill de "y N más" si hay más de MAX_VISIBLE
+    if (files.length > MAX_VISIBLE) {
+      const more = document.createElement('div');
+      more.style.cssText = `
+        background: var(--surface2); border: 0.5px dashed var(--border2);
+        border-radius: var(--radius-sm); display: flex; align-items: center;
+        justify-content: center; min-height: 148px;
+        color: var(--muted); font-size: 13px; font-family: var(--mono);
+        cursor: default;
+      `;
+      more.textContent = `+${files.length - MAX_VISIBLE} más`;
+      previewGrid.appendChild(more);
+    }
+  }
+
+  function makePlaceholder() {
+    const div = document.createElement('div');
+    div.className = 'img-thumb-placeholder';
+    div.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+      <rect x="3" y="3" width="18" height="18" rx="2"/>
+      <circle cx="8.5" cy="8.5" r="1.5"/>
+      <polyline points="21 15 16 10 5 21"/>
+    </svg>`;
+    return div;
+  }
+
+  // ── Actualizar nombres en la grilla sin re-renderizar ────
+  function updateGridNames() {
+    const cards    = previewGrid.querySelectorAll('.img-card');
+    const start    = parseInt(startInput.value) || 1;
+    const d        = digitsInput.value;
+    const seed     = seedInput.value.trim() || 'imagen';
+
+    cards.forEach((card, i) => {
+      const num     = pad(start + i, d);
+      const ext     = getExt(files[i]?.name || '');
+      const newName = `${seed}_${num}${ext ? '.' + ext : ''}`;
+
+      const badge  = card.querySelector('.img-badge');
+      const newDiv = card.querySelector('.img-new');
+      if (badge)  badge.textContent  = num;
+      if (newDiv) { newDiv.textContent = newName; newDiv.title = newName; }
+    });
+
+    updatePreviewLabel();
+    updateMeta();
+  }
+
+  function updateMeta() {
+    const total  = files.length;
+    previewMeta.textContent  = `${total} archivos`;
+    countBubble.textContent  = `${total} ${total === 1 ? 'archivo' : 'archivos'}`;
+    fileCounter.textContent  = `${total} / ${MAX}`;
+  }
+
+  // ── Agregar archivos ─────────────────────────────────────
+  function addFiles(incoming) {
+    const allowed = ['image/jpeg','image/png','image/webp','image/gif'];
+    const valid   = Array.from(incoming).filter(f => allowed.includes(f.type));
+    const invalid = Array.from(incoming).length - valid.length;
+
+    if (invalid > 0) showError(`${invalid} archivo(s) ignorado(s) — solo se aceptan JPG, PNG, WEBP y GIF.`);
+
+    const remaining = MAX - files.length;
+    if (valid.length > remaining) {
+      showError(`Límite de ${MAX} imágenes. Se agregaron ${remaining} de ${valid.length}.`);
+    }
+
+    const toAdd = valid.slice(0, remaining);
+    if (toAdd.length === 0) return;
+
+    files = [...files, ...toAdd];
+
+    showFilesUI();
+    renderGrid();
+    updatePreviewLabel();
+    updateMeta();
+    updateSteps(2);
+  }
+
+  // ── Limpiar todo ─────────────────────────────────────────
+  function clearAll() {
+    files = [];
+    previewGrid.innerHTML = '';
+    fileInput.value = '';
+    hideFilesUI();
+    updateSteps(1);
+  }
+
+  function removeFile(index) {
+    files.splice(index, 1);
+    if (files.length === 0) {
+      clearAll();
+      return;
+    }
+    renderGrid();
+    updatePreviewLabel();
+    updateMeta();
+  }
+
+  // ── Descargar ZIP ────────────────────────────────────────
+  async function downloadZip() {
+    if (files.length === 0) return;
+
+    btnDownload.disabled = true;
+
+    try {
+      const zip = new JSZip();
+
+      for (let i = 0; i < files.length; i++) {
+        const newName = buildNewName(i);
+        zip.file(newName, files[i]);
+        // Progreso al agregar archivos (primera mitad: 0% → 50%)
+        const pct = Math.round(((i + 1) / files.length) * 50);
+        btnLabel.textContent = `Procesando ${i + 1}/${files.length} — ${pct}%`;
+        // Ceder el hilo para que el DOM se actualice
+        if (i % 10 === 0) await new Promise(r => setTimeout(r, 0));
+      }
+
+      const blob = await zip.generateAsync(
+        { type: 'blob', compression: 'STORE' },
+        (meta) => {
+          // Progreso al comprimir (segunda mitad: 50% → 100%)
+          const pct = 50 + Math.round(meta.percent / 2);
+          btnLabel.textContent = `Empaquetando — ${pct}%`;
+        }
+      );
+
+      const seedName = (seedInput.value.trim() || 'imagenes').replace(/\s+/g, '_');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${seedName}_renombradas.zip`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+
+      updateSteps(3);
+      showToast(`✓ ${files.length} ${files.length === 1 ? 'imagen descargada' : 'imágenes descargadas'}`);
+      setTimeout(clearAll, 1200);
+
+    } catch (err) {
+      console.error(err);
+      showError('Ocurrió un error al generar el ZIP. Intentá de nuevo.');
+    } finally {
+      btnDownload.disabled = false;
+      btnLabel.textContent = 'Descargar .zip';
+    }
+  }
+
+  // ── Eventos: Dropzone ────────────────────────────────────
+  dropzone.addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+
+  dropzone.addEventListener('dragover',  e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+  dropzone.addEventListener('dragleave', e => { if (!dropzone.contains(e.relatedTarget)) dropzone.classList.remove('drag-over'); });
+  dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.classList.remove('drag-over');
+    addFiles(e.dataTransfer.files);
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) addFiles(fileInput.files);
+  });
+
+  // ── Eventos: inputs de nombre ────────────────────────────
+  seedInput.addEventListener('input', () => {
+    const invalid = /[\/\\:*?"<>|]/.test(seedInput.value);
+    const hint = document.getElementById('seedHint');
+    seedInput.classList.toggle('invalid', invalid);
+    hint.classList.toggle('show', invalid);
+    if (!invalid) updateGridNames();
+  });
+  startInput.addEventListener('input',  updateGridNames);
+  digitsInput.addEventListener('input', updateGridNames);
+
+  // ── Eventos: botones ─────────────────────────────────────
+  // ── Eventos: botones ─────────────────────────────────────
+  document.getElementById('btnOpts').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('downloadMenu').classList.toggle('open');
+  });
+  document.addEventListener('click', () => {
+    document.getElementById('downloadMenu').classList.remove('open');
+  });
+
+  btnDownload.addEventListener('click', () => downloadZipWith(null));
+  document.getElementById('btnWithCsv').addEventListener('click',  () => downloadZipWith('csv'));
+  document.getElementById('btnWithJson').addEventListener('click', () => downloadZipWith('json'));
+  btnClear.addEventListener('click', clearAll);
+  loadHistory();
+
+  // ── Tema claro/oscuro ────────────────────────────────────
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme  = localStorage.getItem('renamr_theme');
+  if (savedTheme === 'light') document.body.classList.add('light');
+
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light');
+    const isLight = document.body.classList.contains('light');
+    localStorage.setItem('renamr_theme', isLight ? 'light' : 'dark');
+  });
+</script>
