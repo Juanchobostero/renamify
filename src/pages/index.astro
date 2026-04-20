@@ -236,6 +236,7 @@
           <select id="separator" style="width:100%; padding:0 14px; height:42px; border:0.5px solid var(--border2); border-radius:var(--radius-sm); background:var(--surface2); color:var(--text); font-family:var(--mono);">
             <option value="_">Guión bajo ( _ )</option>
             <option value="-">Guión medio ( - )</option>
+            <option value="">Sin separador ()</option>
           </select>
         </div>
         <div class="field">
@@ -1605,5 +1606,20 @@ body.light .icon-moon { display: block; }
     document.body.classList.toggle('light');
     const isLight = document.body.classList.contains('light');
     localStorage.setItem('renamr_theme', isLight ? 'light' : 'dark');
+  });
+
+  // Validar dígitos > 0
+  digitsInput.addEventListener('change', function() {
+    let val = parseInt(this.value);
+    if (isNaN(val) || val < 1) {
+      this.value = 1;
+      showToast('Los dígitos deben ser al menos 1');
+      updateGridNames();
+    }
+    if (val > 5) {
+      this.value = 5;
+      showToast('Máximo 5 dígitos');
+      updateGridNames();
+    }
   });
 </script>
